@@ -68,6 +68,9 @@
     /* Small helpers */
     .pill{border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px}
     .kudos{font-size:12px;margin-top:6px;color:#059669}
+
+    /* NEW: quick highlight when deep-linking to GRC */
+    .flash{box-shadow:0 0 0 3px var(--ring) inset; transition: box-shadow .3s}
   </style>
 </head>
 <body>
@@ -292,7 +295,8 @@
       ],
       projects: [
         { name:"Security Awareness for Kids App", desc:"Interactive mobile app teaching age-appropriate cyber safety (phishing, passwords, privacy) for grades 3–8. Designed to be WCAG, HIPAA, and ADA compliant.", link:"#", tags:["Cyber Education","Accessibility","Compliance"] },
-        { name:"Small Business GRC Toolkit", desc:"Templates for risk registers, vendor due diligence, and SOC 2 readiness using NIST CSF and CIS Controls.", link:"#", tags:["GRC","Templates","SMB"] },
+        /* UPDATED: link now points to #grc so it opens the GRC Toolkit tab */
+        { name:"Small Business GRC Toolkit", desc:"Templates for risk registers, vendor due diligence, and SOC 2 readiness using NIST CSF and CIS Controls.", link:"#grc", tags:["GRC","Templates","SMB"] },
       ],
       cyber: [
         { title:"Have I Been Pwned – Breach Check", url:"https://haveibeenpwned.com/", tags:["Email","Breach"], note:"Scan your email for data breaches and enable MFA on compromised accounts." },
@@ -432,8 +436,8 @@ Evidence to Capture
       list.forEach(c=>{
         const card = el('div',{class:'cert'});
         const status = c.status === "In Progress" ? `<span class="pill">In Progress</span>` : `<span class="pill">Completed</span>`;
-        card.innerHTML = `
-          <div class="row" style="justify-content:space-between">
+        card.innerHTML = 
+          `<div class="row" style="justify-content:space-between">
             <div>
               <div style="font-weight:600">${c.name}</div>
               <div class="muted" style="font-size:12px">${c.provider} • ${c.status}${c.year ? " • "+c.year : ""}</div>
@@ -441,11 +445,10 @@ Evidence to Capture
             ${status}
           </div>
           <div class="muted" style="font-size:12px;margin-top:6px">${c.desc}</div>
-          ${c.status==="In Progress" ? `
-          <div class="progress" aria-label="Learning progress">
+          ${c.status==="In Progress" ? 
+          `<div class="progress" aria-label="Learning progress">
             <div class="bar" style="width:${Math.max(0,Math.min(100,c.progress))}%"></div>
-          </div>` : ``}
-        `;
+          </div>` : ""}`;
         root.appendChild(card);
       });
     }
@@ -471,8 +474,8 @@ Evidence to Capture
       const root = $("#projects"); root.innerHTML="";
       data.projects.forEach(p=>{
         const wrap = el('div',{style:'margin:10px 0'});
-        wrap.innerHTML = `
-          <div style="font-weight:600"><a href="${p.link||'#'}">${p.name}</a></div>
+        wrap.innerHTML = 
+          `<div style="font-weight:600"><a href="${p.link||'#'}">${p.name}</a></div>
           <div class="muted" style="font-size:12px">${p.desc}</div>`;
         if(p.tags?.length){
           const tags = el('div',{class:'tags'});
@@ -513,7 +516,7 @@ Evidence to Capture
         const d = el('details',{class:'tool'});
         d.appendChild(el('summary',{html:`${x.title}<div class="muted" style="font-size:12px;margin-top:4px">${x.note}</div>`}));
         const c = el('div',{class:'card-c'});
-        const pre = el('pre',{html:x.content});
+        const pre = el('pre'); pre.textContent = x.content;
         const row = el('div',{class:'row'},[
           el('button',{class:'btn', html:'Copy'}), 
           el('button',{class:'btn', html:'Download'})
@@ -546,6 +549,41 @@ Evidence to Capture
     }
     $$(".tab").forEach(b=>{
       b.addEventListener("click",()=>setTab(b.id.replace("t-","")));
+    });
+
+    // ---------- NEW: hash-based navigation & deep link to GRC ----------
+    function flashOnce(el){
+      if(!el) return;
+      el.classList.add('flash');
+      setTimeout(()=>el.classList.remove('flash'), 1200);
+    }
+    function navigateTo(hash){
+      if(!hash) return;
+      const map = {
+        "#overview":"overview",
+        "#experience":"experience",
+        "#projects":"projects",
+        "#cyber":"cyber",
+        "#grc":"grc",
+        "#contact":"contact"
+      };
+      const sel = map[hash.toLowerCase()];
+      if(sel){
+        setTab(sel);
+        const targetPanel = document.getElementById("tab-"+sel);
+        if(targetPanel){
+          targetPanel.scrollIntoView({behavior:"smooth", block:"start"});
+          if(sel==="grc"){
+            $("#grcSearch")?.focus();
+            flashOnce(targetPanel.querySelector(".spaced")); // highlight header row
+          }
+        }
+      }
+    }
+    window.addEventListener("hashchange", ()=>navigateTo(location.hash));
+    // If the page loads with a hash (or default to overview)
+    window.addEventListener("DOMContentLoaded", ()=>{
+      navigateTo(location.hash || "#overview");
     });
 
     // ---------- EVENTS ----------
@@ -591,4 +629,3 @@ Evidence to Capture
   </script>
 </body>
 </html>
-
