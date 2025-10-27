@@ -10,8 +10,8 @@
       --accent:#0284c7; --accent-2:#06b6d4; --good:#10b981; --ring:#93c5fd;
     }
     *{box-sizing:border-box}
-    html{scroll-behavior:auto}
-    body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--fg)}
+    body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;
+         background:var(--bg);color:var(--fg)}
     a{color:var(--accent);text-decoration:none}
     a:hover{text-decoration:underline}
     .container{max-width:1100px;margin:0 auto;padding:24px}
@@ -22,7 +22,8 @@
     .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
     .badge{font-size:12px;border:1px solid rgba(255,255,255,.35);padding:4px 10px;border-radius:999px}
     .badge--pill{background:rgba(255,255,255,.12)}
-    .btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--fg);border-radius:12px;padding:8px 12px;cursor:pointer}
+    .btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--fg);
+         border-radius:12px;padding:8px 12px;cursor:pointer}
     .btn--primary{background:#fff;color:#111}
     .btn--solid{background:var(--accent);border-color:var(--accent);color:#fff}
     .btn:focus{outline:3px solid var(--ring);outline-offset:2px}
@@ -64,15 +65,18 @@
     .spaced{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
     .search{border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:220px}
     .hidden{display:none}
+    /* Small helpers */
     .pill{border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px}
     .kudos{font-size:12px;margin-top:6px;color:#059669}
+
+    /* NEW: quick highlight when deep-linking to GRC */
     .flash{box-shadow:0 0 0 3px var(--ring) inset; transition: box-shadow .3s}
   </style>
 </head>
 <body>
   <div class="container">
     <!-- HERO -->
-    <section class="hero" role="banner" id="top">
+    <section class="hero" role="banner">
       <div class="spaced">
         <div>
           <h1 style="margin:0 0 6px 0;font-size:30px;font-weight:800">Jacob Cooper, M.Ed.</h1>
@@ -86,6 +90,7 @@
         </div>
         <div class="row">
           <button class="btn btn--solid" id="printBtn">Download / Print</button>
+         
         </div>
       </div>
     </section>
@@ -118,10 +123,13 @@
         </div>
 
         <div class="grid2">
+          <!-- Education -->
           <div class="card">
             <div class="card-h"><strong>Education</strong></div>
             <div class="card-c muted" id="edu"></div>
           </div>
+
+          <!-- Certifications (search + progress) -->
           <div class="card">
             <div class="card-h">
               <div class="spaced">
@@ -150,7 +158,9 @@
       <!-- CYBER DEFENSE -->
       <div id="tab-cyber" role="tabpanel" class="tabpanel hidden">
         <div class="spaced">
-          <div class="row"><strong>Cyber Defense Resources</strong></div>
+          <div class="row">
+            <strong>Cyber Defense Resources</strong>
+          </div>
           <input class="search" id="cyberSearch" placeholder="Search (e.g., phishing, password)" />
         </div>
         <div class="cards" id="cyber"></div>
@@ -159,7 +169,9 @@
       <!-- GRC TOOLKIT -->
       <div id="tab-grc" role="tabpanel" class="tabpanel hidden">
         <div class="spaced">
-          <div class="row"><strong>GRC Toolkit (Interactive)</strong></div>
+          <div class="row">
+            <strong>GRC Toolkit (Interactive)</strong>
+          </div>
           <div class="row">
             <input class="search" id="grcSearch" placeholder="Search toolkit (e.g., vendor, IG1)" />
             <select class="search" id="grcFilter" style="min-width:160px">
@@ -177,4 +189,443 @@
           <div id="toolkit" class="column" style="display:flex;flex-direction:column;gap:12px"></div>
 
           <div class="card">
-            <div class="card-h"><strong>Quick St
+            <div class="card-h"><strong>Quick Start: Sample Risk Register</strong></div>
+            <div class="card-c">
+              <pre id="riskCSV" class="muted" style="font-size:12px"></pre>
+              <div class="row">
+                <button class="btn" data-copy="#riskCSV">Copy</button>
+                <button class="btn" data-download="#riskCSV" data-fn="risk-register.csv">Download</button>
+              </div>
+              <div class="kudos" aria-live="polite" id="riskNote"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="card-h"><strong>Security Baseline (IG1) – Top 15</strong></div>
+          <div class="card-c">
+            <pre id="ig1" class="muted" style="font-size:12px"></pre>
+            <div class="row">
+              <button class="btn" data-copy="#ig1">Copy</button>
+              <button class="btn" data-download="#ig1" data-fn="baseline-ig1-checklist.md">Download</button>
+            </div>
+            <div class="kudos" aria-live="polite" id="ig1Note"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTACT -->
+      <div id="tab-contact" role="tabpanel" class="tabpanel hidden">
+        <div class="card" id="contact">
+          <div class="card-h"><strong>Contact</strong></div>
+          <div class="card-c muted">
+            <p>Email: <a href="mailto:mrcoop2@gmail.com">mrcoop2@gmail.com</a></p>
+            <p>Phone: 708.243.6853</p>
+            <p>LinkedIn: <a href="https://linkedin.com/in/jmcooper" target="_blank">linkedin.com/in/jmcooper</a></p>
+            <button class="btn" id="printBtn2">Download / Print</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ---------- DATA ----------
+    const data = {
+      education: [
+        { degree: "M.S., Educational Leadership", org: "American College of Education", year: "2013" },
+        { degree: "M.S., Instructional Technology", org: "Lewis University", year: "2007" },
+        { degree: "B.S., Industrial Technology", org: "Illinois State University", year: "1999" },
+      ],
+      certifications: [
+        { name: "ISC2 Certified in Cybersecurity (CC)", status: "In Progress", provider: "ISC2", desc: "Security principles, network, access management, incident response basics.", progress: 15, year: null },
+        { name: "Microsoft SC-900", status: "In Progress", provider: "Microsoft", desc: "Security, Compliance, and Identity fundamentals across Microsoft cloud services.", progress: 80, year: null },
+        { name: "ISC2 CGRC (Certified in Governance, Risk and Compliance)", status: "In Progress", provider: "ISC2", desc: "Governance, risk, and compliance lifecycle: authorization, assessment, continuous monitoring.", progress: 30, year: null },
+        { name: "Qualys PCI Compliance – Certificate of Completion", status: "Completed", provider: "Qualys", desc: "PCI DSS scanning and compliance overview; certificate of completion earned.", progress: 100, year: 2023 },
+      ],
+      experience: [
+        {
+          role: "Cybersecurity Specialist (Contract)",
+          company: "Diversified Technologies – Chicago, IL (Remote)",
+          period: "Jan 2025 – Present",
+          bullets: [
+            "Administered ongoing phishing campaigns and awareness training for 150+ employees.",
+            "Managed endpoint and email security using Xcitium zero-trust protection tools.",
+            "Deployed Microsoft security patches tied to CVE updates to maintain SOC 2 alignment.",
+            "Launching a SOC 2 audit through Drata; maintaining compliance documentation and gap analysis.",
+          ],
+          tags: ["GRC","Awareness","Zero Trust"]
+        },
+        {
+          role: "Technology Manager",
+          company: "Jones Software Corporation – Chicago, IL (Remote)",
+          period: "Jun 2021 – Jan 2025",
+          bullets: [
+            "Centralized policy enforcement through Azure AD and Microsoft 365.",
+            "Established SOC 2-based password rotation and MFA requirements across SaaS platforms.",
+            "Integrated 116 SaaS products into Microsoft Marketplace with compliance documentation.",
+            "Delivered secure product demos for clients within SOC 2 boundaries.",
+          ],
+          tags: ["Azure AD","SOC 2","Policy"]
+        },
+        {
+          role: "IT Security and Operations Manager",
+          company: "Posen-Robbins School District 143.5 – Posen, IL",
+          period: "Mar 2017 – Jun 2021",
+          bullets: [
+            "Oversaw district security policies, device provisioning, and endpoint protection for 9,800 laptops.",
+            "Managed $1.2M technology budget with a focus on cybersecurity initiatives.",
+            "Led staff professional development workshops on security best practices and eLearning tools.",
+            "Directed phishing simulations and data loss prevention policies for 550 end users.",
+      
+          ],
+          tags: ["Leadership","Education Security","Policy"]
+        },
+        {
+          role: "Director of Technology",
+          company: "ECHO Co-op – South Holland, IL",
+          period: "Jul 2012 – Mar 2017",
+          bullets: [
+            "Formed technology committees focused on compliance with federal education technology standards.",
+            "Created district inventory and E-Rate documentation ensuring compliance and audit readiness.",
+            "Implemented secure data handling procedures and Exchange 365 migration.",
+          ],
+          tags: ["Compliance","Education","IT Governance"]
+        }
+      ],
+      projects: [
+        { name:"Security Awareness for Kids App", desc:"Interactive mobile app teaching age-appropriate cyber safety (phishing, passwords, privacy) for grades 3–8. Designed to be WCAG, HIPAA, and ADA compliant.", link:"#", tags:["Cyber Education","Accessibility","Compliance"] },
+        /* UPDATED: link now points to #grc so it opens the GRC Toolkit tab */
+        { name:"Small Business GRC Toolkit", desc:"Templates for risk registers, vendor due diligence, and SOC 2 readiness using NIST CSF and CIS Controls.", link:"#grc", tags:["GRC","Templates","SMB"] },
+      ],
+      cyber: [
+        { title:"Have I Been Pwned – Breach Check", url:"https://haveibeenpwned.com/", tags:["Email","Breach"], note:"Scan your email for data breaches and enable MFA on compromised accounts." },
+        { title:"Bitwarden Password Manager", url:"https://bitwarden.com/", tags:["Passwords"], note:"Centralize and secure your credentials using AES-256 encryption." },
+        { title:"Authy Authenticator", url:"https://authy.com/", tags:["MFA"], note:"Add two-factor authentication to all sensitive accounts." },
+        { title:"CISA Phishing Self-Defense", url:"https://www.cisa.gov/secure-our-world/phishing", tags:["Phishing"], note:"Learn to detect and report phishing attempts effectively." },
+        { title:"NIST Cybersecurity Framework Quick Start", url:"https://www.nist.gov/cyberframework", tags:["Framework"], note:"Adopt Identify–Protect–Detect–Respond–Recover model for business use." },
+        { title:"SANS Security Policy Templates", url:"https://www.sans.org/information-security-policy/", tags:["Policy","Template"], note:"Download ready-to-use security policies for organizations." },
+      ],
+      toolkit: [
+        {
+          title:"Mini Risk Register (CSV)", tags:["Risk","Register"], note:"5 columns: Asset, Threat, Impact, Control, Owner.",
+          content:`Asset,Threat/Scenario,Impact (H/M/L),Existing Controls,Planned Controls,Owner,Due Date
+Google Workspace,Credential phishing,H,Enforce MFA; DKIM/SPF/DMARC,Phishing simulation quarterly,IT,2025-12-01
+Laptops,Ransomware,H,EDR + Auto Updates,Daily backups verified,Ops,2025-11-15
+Parent PII,Unauthorized access,H,Role-based access; least privilege,Quarterly access review,Program Lead,2025-12-15`,
+          filename:"risk-register.csv"
+        },
+        {
+          title:"Vendor Questionnaire (Lightweight)", tags:["Vendor","Due Diligence"], note:"15 yes/no checks incl. MFA, backups, IR, data location.",
+          content:`Vendor Security Questionnaire (Lightweight)
+1. Do you enforce MFA for all administrative access? (Y/N)
+2. Do you perform regular backups with restore tests? (Y/N)
+3. Do you have an incident response plan with contacts? (Y/N)
+4. Where is customer data stored (region)?
+5. Do you have endpoint protection (AV/EDR) on all devices? (Y/N)
+6. Do you encrypt data at rest and in transit? (Y/N)
+7. Do you conduct background checks for personnel? (Y/N)
+8. Do you maintain audit logs for at least 90 days? (Y/N)
+9. Do you perform quarterly access reviews? (Y/N)
+10. Do you have a vulnerability management process (patch SLAs)? (Y/N)
+11. Do you have documented change management? (Y/N)
+12. Do you have a disaster recovery plan and RTO/RPO targets? (Y/N)
+13. Do you use third-party sub-processors? List and provide agreements.
+14. Do you have data retention & deletion policies? (Y/N)
+15. Point of contact for security issues:`,
+          filename:"vendor-questionnaire.md"
+        },
+        {
+          title:"Security Baseline Checklist (IG1)", tags:["Baseline","CIS"], note:"Top settings to flip first in M365/Workspace.",
+          content:`- MFA everywhere (admins mandatory)
+- Unique admin accounts; disable legacy protocols
+- Patch OS/apps automatically; browser auto-update
+- EDR/AV deployed; alerting turned on
+- DNS filtering (Quad9/Cloudflare) forced
+- Backups tested; offline/offsite copy (3-2-1)
+- Least privilege; quarterly access reviews
+- Encrypt devices; enable screen lock
+- Email security: SPF/DKIM/DMARC configured
+- Security awareness quarterly incl. phishing
+- IR one-pager + contacts; tabletop twice yearly
+- Vendor DD: data location, MFA, backups, IR
+- Change management notes for major updates
+- Asset inventory for users/devices/SaaS
+- Logs retained (at least 30–90 days)`,
+          filename:"baseline-ig1-checklist.md"
+        },
+        {
+          title:"Incident Readiness One-Pager", tags:["IR","Playbook"], note:"Who to call, what to capture, how to contain.",
+          content:`Incident Readiness One-Pager
+First 5 Steps
+1. Identify and stop the bleeding (isolate device/network segment).
+2. Preserve evidence (no reboots; take photos/screenshots; collect logs).
+3. Notify: internal security lead, IT, legal, execs. Escalate when PII is involved.
+4. Triage severity and scope; begin timeline.
+5. Engage external partners if needed (IR firm, law enforcement).
+
+Contacts
+- Security Lead: 
+- Legal: 
+- Executive Sponsor: 
+- MSP/IR Partner: 
+
+Evidence to Capture
+- Affected systems, timestamps, user accounts
+- Malicious domains/attachments, hashes, IPs
+- Containment actions taken and when`,
+          filename:"incident-readiness-onepager.md"
+        },
+        {
+          title:"Privacy & Consent Notes (Youth/Edu)", tags:["Privacy","Education"], note:"Plain-English notices for guardians.",
+          content:`Privacy & Consent Notes (Youth/Edu)
+- What data we collect: student name, guardian contact, app usage events.
+- Why we collect it: to provide learning features and keep accounts secure.
+- How we protect it: encryption in transit/at rest; limited access; audits.
+- Sharing: only with vetted service providers for core functionality; no selling.
+- Your choices: request access, corrections, or deletion via [contact].
+- Consent: by signing, you acknowledge the above and agree to app use.`,
+          filename:"privacy-consent-notes.md"
+        }
+      ]
+    };
+
+    // ---------- UTIL ----------
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    function el(tag, attrs={}, children=[]) {
+      const n = document.createElement(tag);
+      Object.entries(attrs).forEach(([k,v]) => {
+        if (k==='class') n.className=v;
+        else if (k==='html') n.innerHTML=v;
+        else n.setAttribute(k,v);
+      });
+      children.forEach(c => n.appendChild(c));
+      return n;
+    }
+    function copyFrom(selector, noteSel){
+      const pre = $(selector);
+      navigator.clipboard.writeText(pre.textContent || "").then(()=>{
+        if (noteSel) { const n=$(noteSel); n.textContent="Copied!"; setTimeout(()=>n.textContent="",1500) }
+      });
+    }
+    function downloadFrom(selector, filename="download.txt"){
+      const t = $(selector).textContent || "";
+      const blob = new Blob([t], {type:"text/plain;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = el('a', {href:url, download:filename});
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    // ---------- RENDER ----------
+    function renderEducation(){
+      const root = $("#edu"); root.innerHTML="";
+      data.education.forEach(e=>{
+        const wrap = el('div',{class:'muted', style:'margin:6px 0;'});
+        wrap.innerHTML = `<div style="font-weight:600;color:var(--fg)">${e.degree}</div>
+                          <div style="font-size:12px">${e.org} (${e.year})</div>`;
+        root.appendChild(wrap);
+      });
+    }
+
+    function renderCerts(filter=""){
+      const root = $("#certs"); root.innerHTML="";
+      const list = data.certifications.filter(c=>(c.name+c.desc+c.provider).toLowerCase().includes(filter.toLowerCase()));
+      if(!list.length){ root.innerHTML = `<div class="muted" style="font-size:12px">No certifications match your search.</div>`; return;}
+      list.forEach(c=>{
+        const card = el('div',{class:'cert'});
+        const status = c.status === "In Progress" ? `<span class="pill">In Progress</span>` : `<span class="pill">Completed</span>`;
+        card.innerHTML = 
+          `<div class="row" style="justify-content:space-between">
+            <div>
+              <div style="font-weight:600">${c.name}</div>
+              <div class="muted" style="font-size:12px">${c.provider} • ${c.status}${c.year ? " • "+c.year : ""}</div>
+            </div>
+            ${status}
+          </div>
+          <div class="muted" style="font-size:12px;margin-top:6px">${c.desc}</div>
+          ${c.status==="In Progress" ? 
+          `<div class="progress" aria-label="Learning progress">
+            <div class="bar" style="width:${Math.max(0,Math.min(100,c.progress))}%"></div>
+          </div>` : ""}`;
+        root.appendChild(card);
+      });
+    }
+
+    function renderExperience(){
+      const root = $("#xp"); root.innerHTML="";
+      data.experience.forEach(e=>{
+        const card = el('div',{class:'card', style:'margin:12px 0'});
+        card.appendChild(el('div',{class:'card-h', html:`<strong>${e.role}</strong> <span class="muted">• ${e.company}</span><div class="muted" style="font-size:12px">${e.period}</div>`}));
+        const body = el('div',{class:'card-c'});
+        const ul = el('ul'); e.bullets.forEach(b=>ul.appendChild(el('li',{html:b})));
+        body.appendChild(ul);
+        if(e.tags?.length){
+          const tags = el('div',{class:'tags'});
+          e.tags.forEach(t=>tags.appendChild(el('span',{class:'tag', html:t})));
+          body.appendChild(tags);
+        }
+        card.appendChild(body); root.appendChild(card);
+      });
+    }
+
+    function renderProjects(){
+      const root = $("#projects"); root.innerHTML="";
+      data.projects.forEach(p=>{
+        const wrap = el('div',{style:'margin:10px 0'});
+        wrap.innerHTML = 
+          `<div style="font-weight:600"><a href="${p.link||'#'}">${p.name}</a></div>
+          <div class="muted" style="font-size:12px">${p.desc}</div>`;
+        if(p.tags?.length){
+          const tags = el('div',{class:'tags'});
+          p.tags.forEach(t=>tags.appendChild(el('span',{class:'tag', html:t})));
+          wrap.appendChild(tags);
+        }
+        root.appendChild(wrap);
+      });
+    }
+
+    function renderCyber(filter=""){
+      const root = $("#cyber"); root.innerHTML="";
+      const list = data.cyber.filter(r=>(r.title+(r.note||"")+(r.tags||[]).join(" ")).toLowerCase().includes(filter.toLowerCase()));
+      list.forEach(r=>{
+        const c = el('div',{class:'res'});
+        const h = el('div',{class:'card-h', html:`<h4>${r.title}</h4>`});
+        const b = el('div',{class:'card-c muted'});
+        b.innerHTML = `<p style="margin:0 0 6px 0">${r.note}</p>`;
+        if(r.tags?.length){
+          const tags = el('div',{class:'tags'});
+          r.tags.forEach(t=>tags.appendChild(el('span',{class:'tag', html:t})));
+          b.appendChild(tags);
+        }
+        const link = el('a',{href:r.url,target:'_blank',class:'btn',html:'Open'});
+        b.appendChild(el('div',{style:'margin-top:8px'},[link]));
+        c.appendChild(h); c.appendChild(b); root.appendChild(c);
+      });
+    }
+
+    function renderToolkit(filterText="", tag="all"){
+      const root = $("#toolkit"); root.innerHTML="";
+      const list = data.toolkit.filter(x=>{
+        const matchesQ = (x.title + x.note + (x.tags||[]).join(" ")).toLowerCase().includes(filterText.toLowerCase());
+        const matchesTag = tag==="all" ? true : (x.tags||[]).some(t=>t.toLowerCase().includes(tag.toLowerCase()));
+        return matchesQ && matchesTag;
+      });
+      list.forEach(x=>{
+        const d = el('details',{class:'tool'});
+        d.appendChild(el('summary',{html:`${x.title}<div class="muted" style="font-size:12px;margin-top:4px">${x.note}</div>`}));
+        const c = el('div',{class:'card-c'});
+        const pre = el('pre'); pre.textContent = x.content;
+        const row = el('div',{class:'row'},[
+          el('button',{class:'btn', html:'Copy'}), 
+          el('button',{class:'btn', html:'Download'})
+        ]);
+        row.children[0].addEventListener('click',()=>copyFrom(pre));
+        row.children[1].addEventListener('click',()=>downloadFrom(pre, x.filename||'template.txt'));
+        c.appendChild(pre);
+        if(x.tags?.length){
+          const tags = el('div',{class:'tags'}); x.tags.forEach(t=>tags.appendChild(el('span',{class:'tag', html:t}))); c.appendChild(tags);
+        }
+        c.appendChild(row);
+        d.appendChild(c); root.appendChild(d);
+      });
+
+      // Quick blocks content
+      $("#riskCSV").textContent = (data.toolkit[0]||{}).content || "";
+      $("#ig1").textContent = (data.toolkit[2]||{}).content || "";
+    }
+
+    // ---------- TAB WIRES ----------
+    const panels = ["overview","experience","projects","cyber","grc","contact"];
+    function setTab(sel){
+      panels.forEach(p=>{
+        const btn = document.getElementById("t-"+p);
+        const panel = document.getElementById("tab-"+p);
+        const active = (p===sel);
+        btn.setAttribute("aria-selected", active ? "true":"false");
+        panel.classList.toggle("hidden", !active);
+      });
+    }
+    $$(".tab").forEach(b=>{
+      b.addEventListener("click",()=>setTab(b.id.replace("t-","")));
+    });
+
+    // ---------- NEW: hash-based navigation & deep link to GRC ----------
+    function flashOnce(el){
+      if(!el) return;
+      el.classList.add('flash');
+      setTimeout(()=>el.classList.remove('flash'), 1200);
+    }
+    function navigateTo(hash){
+      if(!hash) return;
+      const map = {
+        "#overview":"overview",
+        "#experience":"experience",
+        "#projects":"projects",
+        "#cyber":"cyber",
+        "#grc":"grc",
+        "#contact":"contact"
+      };
+      const sel = map[hash.toLowerCase()];
+      if(sel){
+        setTab(sel);
+        const targetPanel = document.getElementById("tab-"+sel);
+        if(targetPanel){
+          targetPanel.scrollIntoView({behavior:"smooth", block:"start"});
+          if(sel==="grc"){
+            $("#grcSearch")?.focus();
+            flashOnce(targetPanel.querySelector(".spaced")); // highlight header row
+          }
+        }
+      }
+    }
+    window.addEventListener("hashchange", ()=>navigateTo(location.hash));
+    // If the page loads with a hash (or default to overview)
+    window.addEventListener("DOMContentLoaded", ()=>{
+      navigateTo(location.hash || "#overview");
+    });
+
+    // ---------- EVENTS ----------
+    $("#printBtn").addEventListener("click", ()=>window.print());
+    $("#printBtn2").addEventListener("click", ()=>window.print());
+    $("#certSearch").addEventListener("input", e=> renderCerts(e.target.value));
+    $("#cyberSearch").addEventListener("input", e=> renderCyber(e.target.value));
+    $("#grcSearch").addEventListener("input", e=> renderToolkit(e.target.value, $("#grcFilter").value));
+    $("#grcFilter").addEventListener("change", e=> renderToolkit($("#grcSearch").value, e.target.value));
+
+    // Copy/Download buttons for the quick blocks
+    $$("[data-copy]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const sel = btn.getAttribute("data-copy");
+        const noteSel = sel==="#riskCSV" ? "#riskNote" : "#ig1Note";
+        copyFrom(sel, noteSel);
+      });
+    });
+    $$("[data-download]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const sel = btn.getAttribute("data-download");
+        const fn = btn.getAttribute("data-fn") || "download.txt";
+        downloadFrom(sel, fn);
+      });
+    });
+
+    // ---------- INITIAL RENDER ----------
+    renderEducation();
+    renderCerts("");
+    renderExperience();
+    renderProjects();
+    renderCyber("");
+    renderToolkit();
+
+    // ---------- Lightweight self-checks (console) ----------
+    try{
+      console.assert(Array.isArray(data.experience) && data.experience.length>0, "Experience should contain entries");
+      console.assert(data.projects.length>=2, "Two or more projects expected");
+      console.assert(data.certifications.every(c=>c.progress>=0 && c.progress<=100), "Cert progress 0–100");
+      console.assert(data.cyber.every(r=>/^https?:\/\//.test(r.url)), "Resource URLs are http(s)");
+      console.log("%cSelf-checks passed","color:#16a34a");
+    }catch(e){ console.warn("Self-check issue:", e); }
+  </script>
+</body>
+</html>
