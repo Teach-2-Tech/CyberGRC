@@ -69,14 +69,14 @@
     .pill{border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px}
     .kudos{font-size:12px;margin-top:6px;color:#059669}
 
-    /* Optional: subtle flash when opening a tab via hash */
+    /* NEW: quick highlight when deep-linking to GRC */
     .flash{box-shadow:0 0 0 3px var(--ring) inset; transition: box-shadow .3s}
   </style>
 </head>
 <body>
   <div class="container">
     <!-- HERO -->
-    <section class="hero" role="banner" id="top">
+    <section class="hero" role="banner">
       <div class="spaced">
         <div>
           <h1 style="margin:0 0 6px 0;font-size:30px;font-weight:800">Jacob Cooper, M.Ed.</h1>
@@ -90,6 +90,7 @@
         </div>
         <div class="row">
           <button class="btn btn--solid" id="printBtn">Download / Print</button>
+         
         </div>
       </div>
     </section>
@@ -276,6 +277,7 @@
             "Managed $1.2M technology budget with a focus on cybersecurity initiatives.",
             "Led staff professional development workshops on security best practices and eLearning tools.",
             "Directed phishing simulations and data loss prevention policies for 550 end users.",
+      
           ],
           tags: ["Leadership","Education Security","Policy"]
         },
@@ -293,6 +295,7 @@
       ],
       projects: [
         { name:"Security Awareness for Kids App", desc:"Interactive mobile app teaching age-appropriate cyber safety (phishing, passwords, privacy) for grades 3–8. Designed to be WCAG, HIPAA, and ADA compliant.", link:"#", tags:["Cyber Education","Accessibility","Compliance"] },
+        /* UPDATED: link now points to #grc so it opens the GRC Toolkit tab */
         { name:"Small Business GRC Toolkit", desc:"Templates for risk registers, vendor due diligence, and SOC 2 readiness using NIST CSF and CIS Controls.", link:"#grc", tags:["GRC","Templates","SMB"] },
       ],
       cyber: [
@@ -420,4 +423,209 @@ Evidence to Capture
       const root = $("#edu"); root.innerHTML="";
       data.education.forEach(e=>{
         const wrap = el('div',{class:'muted', style:'margin:6px 0;'});
-        wrap.innerHTML = `<div style="font-weight:600;color:v
+        wrap.innerHTML = `<div style="font-weight:600;color:var(--fg)">${e.degree}</div>
+                          <div style="font-size:12px">${e.org} (${e.year})</div>`;
+        root.appendChild(wrap);
+      });
+    }
+
+    function renderCerts(filter=""){
+      const root = $("#certs"); root.innerHTML="";
+      const list = data.certifications.filter(c=>(c.name+c.desc+c.provider).toLowerCase().includes(filter.toLowerCase()));
+      if(!list.length){ root.innerHTML = `<div class="muted" style="font-size:12px">No certifications match your search.</div>`; return;}
+      list.forEach(c=>{
+        const card = el('div',{class:'cert'});
+        const status = c.status === "In Progress" ? `<span class="pill">In Progress</span>` : `<span class="pill">Completed</span>`;
+        card.innerHTML = 
+          `<div class="row" style="justify-content:space-between">
+            <div>
+              <div style="font-weight:600">${c.name}</div>
+              <div class="muted" style="font-size:12px">${c.provider} • ${c.status}${c.year ? " • "+c.year : ""}</div>
+            </div>
+            ${status}
+          </div>
+          <div class="muted" style="font-size:12px;margin-top:6px">${c.desc}</div>
+          ${c.status==="In Progress" ? 
+          `<div class="progress" aria-label="Learning progress">
+            <div class="bar" style="width:${Math.max(0,Math.min(100,c.progress))}%"></div>
+          </div>` : ""}`;
+        root.appendChild(card);
+      });
+    }
+
+    function renderExperience(){
+      const root = $("#xp"); root.innerHTML="";
+      data.experience.forEach(e=>{
+        const card = el('div',{class:'card', style:'margin:12px 0'});
+        card.appendChild(el('div',{class:'card-h', html:`<strong>${e.role}</strong> <span class="muted">• ${e.company}</span><div class="muted" style="font-size:12px">${e.period}</div>`}));
+        const body = el('div',{class:'card-c'});
+        const ul = el('ul'); e.bullets.forEach(b=>ul.appendChild(el('li',{html:b})));
+        body.appendChild(ul);
+        if(e.tags?.length){
+          const tags = el('div',{class:'tags'});
+          e.tags.forEach(t=>tags.appendChild(el('span',{class:'tag', html:t})));
+          body.appendChild(tags);
+        }
+        card.appendChild(body); root.appendChild(card);
+      });
+    }
+
+    function renderProjects(){
+      const root = $("#projects"); root.innerHTML="";
+      data.projects.forEach(p=>{
+        const wrap = el('div',{style:'margin:10px 0'});
+        wrap.innerHTML = 
+          `<div style="font-weight:600"><a href="${p.link||'#'}">${p.name}</a></div>
+          <div class="muted" style="font-size:12px">${p.desc}</div>`;
+        if(p.tags?.length){
+          const tags = el('div',{class:'tags'});
+          p.tags.forEach(t=>tags.appendChild(el('span',{class:'tag', html:t})));
+          wrap.appendChild(tags);
+        }
+        root.appendChild(wrap);
+      });
+    }
+
+    function renderCyber(filter=""){
+      const root = $("#cyber"); root.innerHTML="";
+      const list = data.cyber.filter(r=>(r.title+(r.note||"")+(r.tags||[]).join(" ")).toLowerCase().includes(filter.toLowerCase()));
+      list.forEach(r=>{
+        const c = el('div',{class:'res'});
+        const h = el('div',{class:'card-h', html:`<h4>${r.title}</h4>`});
+        const b = el('div',{class:'card-c muted'});
+        b.innerHTML = `<p style="margin:0 0 6px 0">${r.note}</p>`;
+        if(r.tags?.length){
+          const tags = el('div',{class:'tags'});
+          r.tags.forEach(t=>tags.appendChild(el('span',{class:'tag', html:t})));
+          b.appendChild(tags);
+        }
+        const link = el('a',{href:r.url,target:'_blank',class:'btn',html:'Open'});
+        b.appendChild(el('div',{style:'margin-top:8px'},[link]));
+        c.appendChild(h); c.appendChild(b); root.appendChild(c);
+      });
+    }
+
+    function renderToolkit(filterText="", tag="all"){
+      const root = $("#toolkit"); root.innerHTML="";
+      const list = data.toolkit.filter(x=>{
+        const matchesQ = (x.title + x.note + (x.tags||[]).join(" ")).toLowerCase().includes(filterText.toLowerCase());
+        const matchesTag = tag==="all" ? true : (x.tags||[]).some(t=>t.toLowerCase().includes(tag.toLowerCase()));
+        return matchesQ && matchesTag;
+      });
+      list.forEach(x=>{
+        const d = el('details',{class:'tool'});
+        d.appendChild(el('summary',{html:`${x.title}<div class="muted" style="font-size:12px;margin-top:4px">${x.note}</div>`}));
+        const c = el('div',{class:'card-c'});
+        const pre = el('pre'); pre.textContent = x.content;
+        const row = el('div',{class:'row'},[
+          el('button',{class:'btn', html:'Copy'}), 
+          el('button',{class:'btn', html:'Download'})
+        ]);
+        row.children[0].addEventListener('click',()=>copyFrom(pre));
+        row.children[1].addEventListener('click',()=>downloadFrom(pre, x.filename||'template.txt'));
+        c.appendChild(pre);
+        if(x.tags?.length){
+          const tags = el('div',{class:'tags'}); x.tags.forEach(t=>tags.appendChild(el('span',{class:'tag', html:t}))); c.appendChild(tags);
+        }
+        c.appendChild(row);
+        d.appendChild(c); root.appendChild(d);
+      });
+
+      // Quick blocks content
+      $("#riskCSV").textContent = (data.toolkit[0]||{}).content || "";
+      $("#ig1").textContent = (data.toolkit[2]||{}).content || "";
+    }
+
+    // ---------- TAB WIRES ----------
+    const panels = ["overview","experience","projects","cyber","grc","contact"];
+    function setTab(sel){
+      panels.forEach(p=>{
+        const btn = document.getElementById("t-"+p);
+        const panel = document.getElementById("tab-"+p);
+        const active = (p===sel);
+        btn.setAttribute("aria-selected", active ? "true":"false");
+        panel.classList.toggle("hidden", !active);
+      });
+    }
+    $$(".tab").forEach(b=>{
+      b.addEventListener("click",()=>setTab(b.id.replace("t-","")));
+    });
+
+    // ---------- NEW: hash-based navigation & deep link to GRC ----------
+    function flashOnce(el){
+      if(!el) return;
+      el.classList.add('flash');
+      setTimeout(()=>el.classList.remove('flash'), 1200);
+    }
+    function navigateTo(hash){
+      if(!hash) return;
+      const map = {
+        "#overview":"overview",
+        "#experience":"experience",
+        "#projects":"projects",
+        "#cyber":"cyber",
+        "#grc":"grc",
+        "#contact":"contact"
+      };
+      const sel = map[hash.toLowerCase()];
+      if(sel){
+        setTab(sel);
+        const targetPanel = document.getElementById("tab-"+sel);
+        if(targetPanel){
+          targetPanel.scrollIntoView({behavior:"smooth", block:"start"});
+          if(sel==="grc"){
+            $("#grcSearch")?.focus();
+            flashOnce(targetPanel.querySelector(".spaced")); // highlight header row
+          }
+        }
+      }
+    }
+    window.addEventListener("hashchange", ()=>navigateTo(location.hash));
+    // If the page loads with a hash (or default to overview)
+    window.addEventListener("DOMContentLoaded", ()=>{
+      navigateTo(location.hash || "#overview");
+    });
+
+    // ---------- EVENTS ----------
+    $("#printBtn").addEventListener("click", ()=>window.print());
+    $("#printBtn2").addEventListener("click", ()=>window.print());
+    $("#certSearch").addEventListener("input", e=> renderCerts(e.target.value));
+    $("#cyberSearch").addEventListener("input", e=> renderCyber(e.target.value));
+    $("#grcSearch").addEventListener("input", e=> renderToolkit(e.target.value, $("#grcFilter").value));
+    $("#grcFilter").addEventListener("change", e=> renderToolkit($("#grcSearch").value, e.target.value));
+
+    // Copy/Download buttons for the quick blocks
+    $$("[data-copy]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const sel = btn.getAttribute("data-copy");
+        const noteSel = sel==="#riskCSV" ? "#riskNote" : "#ig1Note";
+        copyFrom(sel, noteSel);
+      });
+    });
+    $$("[data-download]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const sel = btn.getAttribute("data-download");
+        const fn = btn.getAttribute("data-fn") || "download.txt";
+        downloadFrom(sel, fn);
+      });
+    });
+
+    // ---------- INITIAL RENDER ----------
+    renderEducation();
+    renderCerts("");
+    renderExperience();
+    renderProjects();
+    renderCyber("");
+    renderToolkit();
+
+    // ---------- Lightweight self-checks (console) ----------
+    try{
+      console.assert(Array.isArray(data.experience) && data.experience.length>0, "Experience should contain entries");
+      console.assert(data.projects.length>=2, "Two or more projects expected");
+      console.assert(data.certifications.every(c=>c.progress>=0 && c.progress<=100), "Cert progress 0–100");
+      console.assert(data.cyber.every(r=>/^https?:\/\//.test(r.url)), "Resource URLs are http(s)");
+      console.log("%cSelf-checks passed","color:#16a34a");
+    }catch(e){ console.warn("Self-check issue:", e); }
+  </script>
+</body>
+</html>
